@@ -1,3 +1,6 @@
+#Full credit to Jonathan Pilafas on Kaggle for creating the csv utilized in this code
+#csv file can be found at https://www.kaggle.com/datasets/jonathanpilafas/2024-march-madness-statistical-analysis
+
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -16,7 +19,7 @@ print(df.head())
 # Step 1: Data Preprocessing
 
 # Dont need team names for training data, drop then
-df = df.drop(columns=['Mapped ESPN Team Name'])
+df = df.drop(columns='Mapped ESPN Team Name')
 
 # Separate features (X) and the target variable (y)
 X = df.drop(columns=['Tournament Winner?', 'Tournament Championship?', 'Final Four?'])
@@ -55,20 +58,25 @@ print(classification_report(y_test['Tournament Winner?'], y_pred[:, 0], zero_div
 df_2025 = pd.read_csv('MMData/2025Teams.csv')
 X_2025 = df_2025[X.columns]
 
-def whoWon(one, two, rfModel):
-    ballout = np.concatenate([one, two]).reshape(1,-1)
-    prob = rfModel.predict_proba(ballout)
-
-    return one if prob[0][1] > prob[0][0] else two
+def whoWon(on, tw, rfModel):
+    numeric_on = on[X.columns]
+    numeric_tw = tw[X.columns]
     
-def gameTime(one, two, Model, roundNum):
-    onet = one
-    twot = two
-    winner = whoWon(onet.drop(columns='Mapped ESPN Team Name'), two, Model)
-    if(winner == onet):
-        print(f"{one['Mapped ESPN Team Name']} has won in round {roundNum}")
-    if(winner == twot):
-        print(f"{two['Mapped ESPN Team Name']} has won in round {roundNum}")
+    # Get predictions for both teams
+    prob_on = rfModel.estimators_[0].predict_proba(numeric_on.values.reshape(1,-1))
+    prob_tw = rfModel.estimators_[0].predict_proba(numeric_tw.values.reshape(1,-1))
+    
+    # Compare probabilities
+    return 'team1' if prob_on[0][1] > prob_tw[0][1] else 'team2'
+
+def gameTime(on, tw, Model, roundNum):
+    # Don't modify the dataframes here
+    winner = whoWon(on, tw, Model)
+    
+    if winner == 'team1':
+        print(f"{on['Mapped ESPN Team Name'].iloc[0]} has won in round {roundNum}")
+    else:
+        print(f"{tw['Mapped ESPN Team Name'].iloc[0]} has won in round {roundNum}")
 #Let the tourney start
-#South
-gameTime(df_2025.loc[df_2025['Mapped ESPN Team Name']=='Kansas'].index, df_2025.loc[df_2025['Mapped ESPN Team Name']=='Alabama'].index, modelUsed, 8)
+# Champs
+gameTime(df_2025.loc[df_2025['Mapped ESPN Team Name']=='Alabama'], df_2025.loc[df_2025['Mapped ESPN Team Name']=='Kansas'], modelUsed, 8)
