@@ -78,4 +78,4 @@ def gameTime(on, tw, Model, roundNum):
         print(f"{tw['Mapped ESPN Team Name'].iloc[0]} has won in round {roundNum}")
 #Let the tourney start
 # Champs
-gameTime(df_2025.loc[df_2025['Mapped ESPN Team Name']=='Alabama'], df_2025.loc[df_2025['Mapped ESPN Team Name']=='Kansas'], modelUsed, 8)
+gameTime(df_2025.loc[df_2025['Mapped ESPN Team Name']=='Duke'], df_2025.loc[df_2025['Mapped ESPN Team Name']=='Florida'], modelUsed, 8)
