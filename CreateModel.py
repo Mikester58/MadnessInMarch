@@ -25,16 +25,16 @@ X = df.drop(columns=['Tournament Winner?', 'Tournament Championship?', 'Final Fo
 y = df[['Tournament Winner?', 'Tournament Championship?', 'Final Four?']]
 
 # Step 2: Split the Data into Training and Testing Sets
-#X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3,random_state=42)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.30, random_state=42)
+# Used to check F1 & MSE scores
 #X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, train_size=0.50, random_state=42)
 
-#weigh the champion & runner up higher
+# Weigh the champion & runner up higher
 y_train['Tournament Winner?'] *= 3
 y_train['Tournament Championship?'] *= 2
 
-# Step 3: Train the Random Forest Classifier
+# Step 3: Train RFC
 print("Training Random Forest Classifier...")
 rfc = RandomForestClassifier(n_estimators=100, max_depth=3)
 modelUsed = MultiOutputClassifier(rfc)
@@ -53,7 +53,7 @@ print(f"Runner-Up Accuracy: {runner_up_accuracy}")
 print("Classification Report:")
 print(classification_report(y_test['Tournament Winner?'], y_pred[:, 0], zero_division=0))
 
-# Step 6: Load and Use the Model on 2025 Data
+# Step 4: Use the Model on 2025 Data
 df_2025 = pd.read_csv('MMData/2025Teams.csv')
 X_2025 = df_2025[X.columns]
 
@@ -69,13 +69,12 @@ def whoWon(on, tw, rfModel):
     return 'team1' if prob_on[0][1] > prob_tw[0][1] else 'team2'
 
 def gameTime(on, tw, Model, roundNum):
-    # Don't modify the dataframes here
     winner = whoWon(on, tw, Model)
     
     if winner == 'team1':
         print(f"{on['Mapped ESPN Team Name'].iloc[0]} has won in round {roundNum}")
     else:
         print(f"{tw['Mapped ESPN Team Name'].iloc[0]} has won in round {roundNum}")
-#Let the tourney start
+# Let the tourney start
 # Champs
 gameTime(df_2025.loc[df_2025['Mapped ESPN Team Name']=='Duke'], df_2025.loc[df_2025['Mapped ESPN Team Name']=='Florida'], modelUsed, 8)
